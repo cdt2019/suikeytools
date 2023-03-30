@@ -1,0 +1,24 @@
+{
+  "name": "suikeytools",
+  "version": "1.0.0",
+  "description": "gen sui key",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --build tsconfig.json",
+    "start": "node ./src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cdt2019/suikeytools.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cdt2019/suikeytools/issues"
+  },
+  "homepage": "https://github.com/cdt2019/suikeytools#readme",
+  "dependencies": {
+    "@mysten/sui.js": "^0.30.0"
+  }
+}
