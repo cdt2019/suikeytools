@@ -13,7 +13,7 @@ const args = parse<FaucetOption>({
     keyFile: {type: String, alias: 'k', description: 'key file path'},
     maxFaucet: {type: Number, alias: 'f', description: 'max faucet count per address', optional: true},
     maxRow:  {type: Number, alias: 'r', description: 'max rows of per faucet round ', optional: true},
-    waitTime:  {type: Number, alias: 'w', description: 'max rows of per faucet round ', optional: true},
+    waitTime:  {type: Number, alias: 'w', description: 'wait time for next round faucet ', optional: true},
 });
 
 let { keyFile, maxFaucet, maxRow, waitTime} =  {
