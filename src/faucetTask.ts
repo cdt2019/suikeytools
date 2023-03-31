@@ -1,6 +1,7 @@
 
 import { parse } from 'ts-command-line-args';
 import { Faucet } from "./faucet";
+import {format} from 'date-fns';
 
 interface FaucetOption{
     keyFile: string;
@@ -24,7 +25,8 @@ let { keyFile, maxFaucet, maxRow, waitTime} =  {
 }
 
 const tiemer = () => {
-    console.log("wait a fews minute for new round faucet.");
+
+    console.log(format(new Date(), 'yyyy-MM-dd hh:mm:ss'), "wait a fews minute for next round faucet.");
     setTimeout(()=>{
         new Faucet(keyFile, maxFaucet, maxRow, tiemer).run();
     }, waitTime);
@@ -53,5 +55,5 @@ faucet.run();
 // let  testCase = new TestCase(tiemer).test();
 
 
-// node .\src\faucetTask.js --keyFile=C:\Users\cxw\Desktop\sui_key.xlsx --maxFaucet=5 --maxRow=5
+// node .\src\faucetTask.js --keyFile=C:\Users\cxw\Desktop\sui_key.xlsx --maxFaucet=5 --maxRow=5 --waitTime=1000
 // node .\src\faucetTask.js --keyFile=C:\Users\chen\Desktop\sui_key.xlsx --maxFaucet=5 --maxRow=5 --waitTime=1000

@@ -1,5 +1,6 @@
 import { JsonRpcProvider, Connection } from '@mysten/sui.js';
 import Excel from 'exceljs'
+import {format} from 'date-fns';
 
 async function readKeyFromFile(workbook: Excel.Workbook, filePath: string){
     await workbook.xlsx.readFile(filePath);
@@ -26,16 +27,16 @@ export class Faucet {
     }
 
     run():void{
-        console.log("start run faucet script.")
+        console.log(format(new Date(), 'yyyy-MM-dd hh:mm:ss'), "start run faucet script.")
         const workbook = new Excel.Workbook();
        
         readKeyFromFile(workbook, this.keyFile).then(()=>{
-            console.log("load key file sucessfully.")
+            console.log(format(new Date(), 'yyyy-MM-dd hh:mm:ss'), "load key file sucessfully.")
             return this.faucet(workbook, this.keyFile);
         }).catch(err => {
             console.log(err);
         }).finally(()=>{
-            console.log("faucet script run done.");
+            console.log(format(new Date(), 'yyyy-MM-dd hh:mm:ss'), "faucet script run done.");
             //执行回调
             this.callback();
         })
@@ -57,18 +58,18 @@ export class Faucet {
                 break;
             }
             await provider.requestSuiFromFaucet(address).then(result => {
-                console.log(address + " faucet done.");
+                console.log(format(new Date(), 'yyyy-MM-dd hh:mm:ss'), address + " faucet done.");
                 faucet_address_count++;
                 this.updateFaucetCount(address, row);
             }).catch(err =>{
-                throw new Error(address+"faucet error." + err);
+                throw new Error(format(new Date(), 'yyyy-MM-dd hh:mm:ss')+" "+ address+" faucet error." + err);
             }).finally(() => {
             });
         }
-        console.log("faucet done, will save key file.");
+        console.log(format(new Date(), 'yyyy-MM-dd hh:mm:ss'), "faucet done, will save key file.");
         //save file
         await workbook.xlsx.writeFile(keyFile);
-        console.log("save key file sucessful!");
+        console.log(format(new Date(), 'yyyy-MM-dd hh:mm:ss'), "save key file sucessful!");
     }
 
     /**
@@ -96,7 +97,7 @@ export class Faucet {
             try{
                 facunt_count = Number.parseInt(faucetCell.toString());
             }catch(err)  {
-                console.log('read ' + address + " faucet error. " + err);
+                console.log(format(new Date(), 'yyyy-MM-dd hh:mm:ss'), ' read ' + address + " faucet error. " + err);
                 facunt_count = 0;
             }
         } else {

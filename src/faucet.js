@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Faucet = void 0;
 const sui_js_1 = require("@mysten/sui.js");
 const exceljs_1 = __importDefault(require("exceljs"));
+const date_fns_1 = require("date-fns");
 function readKeyFromFile(workbook, filePath) {
     return __awaiter(this, void 0, void 0, function* () {
         yield workbook.xlsx.readFile(filePath);
@@ -32,15 +33,15 @@ class Faucet {
         this.callback = callback;
     }
     run() {
-        console.log("start run faucet script.");
+        console.log((0, date_fns_1.format)(new Date(), 'yyyy-MM-dd hh:mm:ss'), "start run faucet script.");
         const workbook = new exceljs_1.default.Workbook();
         readKeyFromFile(workbook, this.keyFile).then(() => {
-            console.log("load key file sucessfully.");
+            console.log((0, date_fns_1.format)(new Date(), 'yyyy-MM-dd hh:mm:ss'), "load key file sucessfully.");
             return this.faucet(workbook, this.keyFile);
         }).catch(err => {
             console.log(err);
         }).finally(() => {
-            console.log("faucet script run done.");
+            console.log((0, date_fns_1.format)(new Date(), 'yyyy-MM-dd hh:mm:ss'), "faucet script run done.");
             //执行回调
             this.callback();
         });
@@ -62,18 +63,18 @@ class Faucet {
                     break;
                 }
                 yield provider.requestSuiFromFaucet(address).then(result => {
-                    console.log(address + " faucet done.");
+                    console.log((0, date_fns_1.format)(new Date(), 'yyyy-MM-dd hh:mm:ss'), address + " faucet done.");
                     faucet_address_count++;
                     this.updateFaucetCount(address, row);
                 }).catch(err => {
-                    throw new Error(address + "faucet error." + err);
+                    throw new Error((0, date_fns_1.format)(new Date(), 'yyyy-MM-dd hh:mm:ss') + " " + address + "faucet error." + err);
                 }).finally(() => {
                 });
             }
-            console.log("faucet done, will save key file.");
+            console.log((0, date_fns_1.format)(new Date(), 'yyyy-MM-dd hh:mm:ss'), "faucet done, will save key file.");
             //save file
             yield workbook.xlsx.writeFile(keyFile);
-            console.log("save key file sucessful!");
+            console.log((0, date_fns_1.format)(new Date(), 'yyyy-MM-dd hh:mm:ss'), "save key file sucessful!");
         });
     }
     /**
@@ -101,7 +102,7 @@ class Faucet {
                 facunt_count = Number.parseInt(faucetCell.toString());
             }
             catch (err) {
-                console.log('read ' + address + " faucet error. " + err);
+                console.log((0, date_fns_1.format)(new Date(), 'yyyy-MM-dd hh:mm:ss'), ' read ' + address + " faucet error. " + err);
                 facunt_count = 0;
             }
         }

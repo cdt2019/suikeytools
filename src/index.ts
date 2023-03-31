@@ -117,7 +117,7 @@ async function writeKeyFile(workbook: Excel.Workbook, writeFilePath: string){
 }
 console.log("save key file sucessfully!");
 
-// node .\src\index.js --filepath=C:\Users\cxw\Desktop\ --filename=sui-key.xlsx --num=20
+// node .\src\index.js --filepath=C:\Users\cxw\Desktop\ --filename=sui_key.xlsx --num=20
 // node .\src\index.js --p=C:\Users\cxw\Desktop\ --f=sui-key --n=20
 
 // npm run build
