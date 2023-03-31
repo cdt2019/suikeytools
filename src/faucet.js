@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Faucet = void 0;
 const sui_js_1 = require("@mysten/sui.js");
 const exceljs_1 = __importDefault(require("exceljs"));
 function readKeyFromFile(workbook, filePath) {
@@ -19,42 +20,95 @@ function readKeyFromFile(workbook, filePath) {
         yield workbook.xlsx.readFile(filePath);
     });
 }
-const provider = new sui_js_1.JsonRpcProvider(new sui_js_1.Connection({ fullnode: 'https://fullnode.testnet.sui.io',
-    faucet: 'https://faucet.testnet.sui.io/gas' }));
-const filename = "C:\\Users\\cxw\\Desktop\\sui_key.xlsx";
-const workbook = new exceljs_1.default.Workbook();
-readKeyFromFile(workbook, filename).then(() => {
-    return faucet(workbook);
-}).catch(err => {
-    console.log(err);
-}).finally(() => {
-    console.log("finally");
-});
-function faucet(workbook) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let worksheet = workbook.getWorksheet(1);
-        let rowCount = worksheet.rowCount;
-        let rows = worksheet.getRows(1, 3) || [];
-        for (let i = 0; i < rows.length; i++) {
-            let row = rows[i];
-            let address = row.getCell(2).text;
-            yield provider.requestSuiFromFaucet(address).then(result => {
-                console.log(result);
-            }).catch(err => {
-                throw new Error(`address, "faucet error.", {err}`);
-            }).finally(() => {
-            });
+const provider = new sui_js_1.JsonRpcProvider(new sui_js_1.Connection({ fullnode: 'https://fullnode.testnet.sui.io', faucet: 'https://faucet.testnet.sui.io/gas' }));
+const INIT_ROW_INDEX = 2;
+const ADDRESS_CELL_INDEX = 2;
+const FAUCET_CELL_INDEX = 5;
+class Faucet {
+    constructor(keyFile, maxFaucet = 2, maxRowPerFaucet = 5, callback = () => { }) {
+        this.keyFile = keyFile;
+        this.maxFaucet = maxFaucet;
+        this.maxRowPerFaucet = maxRowPerFaucet;
+        this.callback = callback;
+    }
+    run() {
+        console.log("start run faucet script.");
+        const workbook = new exceljs_1.default.Workbook();
+        readKeyFromFile(workbook, this.keyFile).then(() => {
+            console.log("load key file sucessfully.");
+            return this.faucet(workbook, this.keyFile);
+        }).catch(err => {
+            console.log(err);
+        }).finally(() => {
+            console.log("faucet script run done.");
+            //执行回调
+            this.callback();
+        });
+    }
+    faucet(workbook, keyFile) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let worksheet = workbook.getWorksheet(1);
+            let rowCount = worksheet.rowCount;
+            let rows = worksheet.getRows(INIT_ROW_INDEX, rowCount - 1) || [];
+            let faucet_address_count = 1;
+            for (let i = 0; i < rows.length; i++) {
+                let row = rows[i];
+                let address = row.getCell(ADDRESS_CELL_INDEX).text;
+                let faucetCount = this.getFaucetCount(address, row);
+                if (faucetCount >= this.maxFaucet) {
+                    continue;
+                }
+                if (faucet_address_count > this.maxRowPerFaucet) {
+                    break;
+                }
+                yield provider.requestSuiFromFaucet(address).then(result => {
+                    console.log(address + " faucet done.");
+                    faucet_address_count++;
+                    this.updateFaucetCount(address, row);
+                }).catch(err => {
+                    throw new Error(address + "faucet error." + err);
+                }).finally(() => {
+                });
+            }
+            console.log("faucet done, will save key file.");
+            //save file
+            yield workbook.xlsx.writeFile(keyFile);
+            console.log("save key file sucessful!");
+        });
+    }
+    /**
+     * update faucet count
+     * @param address
+     * @param row
+     */
+    updateFaucetCount(address, row) {
+        let faucetCell = row.getCell(FAUCET_CELL_INDEX);
+        let faucetCount = this.getFaucetCount(address, row);
+        faucetCell.value = faucetCount + 1;
+        row.commit();
+    }
+    /**
+     * get address faucet count
+     * @param address
+     * @param row
+     * @returns
+     */
+    getFaucetCount(address, row) {
+        let faucetCell = row.getCell(FAUCET_CELL_INDEX);
+        let facunt_count = 0;
+        if (faucetCell.value) {
+            try {
+                facunt_count = Number.parseInt(faucetCell.toString());
+            }
+            catch (err) {
+                console.log('read ' + address + " faucet error. " + err);
+                facunt_count = 0;
+            }
         }
-    });
+        else {
+            facunt_count = 0;
+        }
+        return facunt_count;
+    }
 }
-// const main = async () => {
-//     const workbook = new Excel.Workbook();
-//     //const content = await workbook.xlsx.readFile("D:\\1.xlsx");
-//     const content = await workbook.xlsx.readFile("D:\\1.xlsx");
-//     const worksheet = content.getWorksheet("Sheet2");
-//     console.log(worksheet.rowCount)
-//     console.log(worksheet.getRow(1))
-//     console.log(worksheet.getRow(2).cellCount)
-//     console.log(worksheet.getRow(2).getCell(1).text)
-//   };
-//   main().then();
+exports.Faucet = Faucet;
